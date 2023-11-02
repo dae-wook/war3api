@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+
+    <title>꿈알피지 장비 등록</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500;600;700;900&display=swap"
+          rel="stylesheet">
+
+    <script>
+        $(document).ready(function () {
+            drop_monster()
+            getEquipments()
+        });
+
+
+        function save_equipment() {
+
+            let name = $('#name').val()
+            let option = $('#option').val()
+            let dedicatedOption = $('#dedicatedOption').val()
+            let dropMonster = $('#dropMonster').val()
+            let ingredients = $('#ingredients').val()
+            let type = $('#type').val()
+            let passive = $('#passive').val()
+            let active = $('#active').val()
+            let grade = $('#grade').val()
+            let level = $('#level').val()
+
+            $.ajax({
+                type: 'POST',
+                url: '/mrpg/admin/equipment',
+                data: {
+                    name: name,
+                    option: option,
+                    dedicatedOption: dedicatedOption,
+                    dropMonster: dropMonster,
+                    ingredients: ingredients,
+                    type: type,
+                    passive: passive,
+                    active: active,
+                    grade: grade,
+                    level: level,
+                },
+                success: function (response) {
+                    if(response["statusCode"] === 200) {
+                        alert(response.result);
+                        $('#name').val("");
+                        $('#option').val("");
+                        $('#level').val("");
+                        $('#dropMonster option:eq(0)').prop("selected", true);
+                        $('#ingredients').val("");
+                        $('#dedicatedOption').val("");
+                        $('#passive').val("");
+                        $('#active').val("");
+                        getEquipments();
+                        drop_monster();
+                    }
+                }
+            })
+        }
+
+        function getEquipments() {
+            $('#itemRow').empty();
+            $.ajax({
+                type: "GET",
+                url: "/mrpg/api/equipments",
+                data: {},
+                success: function (response) {
+                    console.log(response)
+                    for(let v of response) {
+                        let temp_html = `            <tr>
+                                                        <th scope="row">${v["id"]}</th>
+                                                        <td><input id="name${v["id"]}" value="${v["name"]}"/></td>
+                                                        <td><input style="width: 50px" value="${v["type"]}"/></td>
+                                                        <td><input style="width: 50px" value="${v["grade"]}"/></td>
+                                                        <td><input style="width: 50px" value="${v["level"]}"/></td>
+                                                        <td><input value="${v["option"]}"/></td>
+                                                        <td><input value="${v["dropMonster"]}"/></td>
+                                                        <td><input value="${v["ingredients"]}"/></td>
+                                                        <td><input value="${v["dedicatedOption"]}"/></td>
+                                                        <td><input value="${v["passive"]}"/></td>
+                                                        <td><input value="${v["active"]}"/></td>
+                                                        <td><button type="button">수정</button> </td>
+                                                    </tr>`
+                        $('#itemRow').append(temp_html)
+                    }
+
+                }
+            });
+        }
+
+
+        function drop_monster() {
+            $('#dropMonster').empty();
+            $('#dropMonster').append(`<option value=""></option>`)
+            $.ajax({
+                type: "GET",
+                url: "/mrpg/admin/dropMonsters",
+                data: {},
+                success: function (response) {
+
+                    for(let v of response) {
+                        temp_html = `<option value="${v}">${v}</option>`
+
+                        $('#dropMonster').append(temp_html)
+                    }
+
+                }
+            });
+        }
+    </script>
+    <style>
+        #input-box{
+            width: 800px;
+            margin: 50px auto 0 auto;
+        }
+        #item-box {
+            width: 100%;
+            /*margin: 50px auto 0 auto;*/
+        }
+        #input-box > button{
+            width: 800px;
+            margin: 0px auto 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="input-box">
+        <div class="form-floating mb-3">
+            <input type="text" name="name" class="form-control" id="name" placeholder="name@example.com" required>
+            <label for="name">아이템명</label>
+        </div>
+        <div class="input-group mb-3">
+            <label class="input-group-text" for="type">아이템 타입</label>
+            <select class="form-select" name="type" id="type" required>
+                <option selected></option>
+                <option value="melee">근접</option>
+                <option value="bow">원거리</option>
+                <option value="staff">지팡이</option>
+                <option value="armor">방어구</option>
+                <option value="helmet">투구</option>
+                <option value="accessory">장신구</option>
+                <option value="sub">보조</option>
+                <option value="stone">마법석</option>
+                <option value="tool">도구</option>
+                <option value="insignia">휘장</option>
+            </select>
+        </div>
+        <div class="input-group mb-3">
+            <label class="input-group-text" for="grade">등급</label>
+            <select class="form-select" name="grade" id="grade" required>
+                <option selected></option>
+                <option value="성물">성물</option>
+                <option value="전설">전설</option>
+                <option value="서사">서사</option>
+                <option value="유물">유물</option>
+                <option value="고대">고대</option>
+            </select>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="number" name="level" class="form-control" id="level" placeholder="name@example.com" required>
+            <label for="level">레벨</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="text" name="option" class="form-control" id="option" placeholder="name@example.com" required>
+            <label for="name">옵션</label>
+        </div>
+        <div class="input-group mb-3">
+            <label class="input-group-text" for="dropMonster">드랍몬스터</label>
+            <select class="form-select" name="dropMonster" id="dropMonster" required>
+                <option selected></option>
+            </select>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="text" name="ingredients" class="form-control" id="ingredients" placeholder="name@example.com">
+            <label for="ingredients">조합법</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input type="text" name="dedicatedOption" class="form-control" id="dedicatedOption" placeholder="name@example.com">
+            <label for="name">직업 전용옵션</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="text" name="passive" class="form-control" id="passive" placeholder="name@example.com">
+            <label for="passive">패시브</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="text" name="active" class="form-control" id="active" placeholder="name@example.com">
+            <label for="active">액티브</label>
+        </div>
+        <button type="submit" onclick="save_equipment()" class="btn btn-success">등록</button>
+    </div>
+    <div id="item-box">
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">아이템명</th>
+                <th scope="col">타입</th>
+                <th scope="col">등급</th>
+                <th scope="col">레벨</th>
+                <th scope="col">옵션</th>
+                <th scope="col">드랍몬스터</th>
+                <th scope="col">조합법</th>
+                <th scope="col">직업 전용옵션</th>
+                <th scope="col">패시브</th>
+                <th scope="col">액티브</th>
+                <th scope="col">수정</th>
+            </tr>
+            </thead>
+            <tbody id="itemRow">
+
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
